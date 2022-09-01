@@ -20,6 +20,14 @@ export default async function parseVersion(path, explain = false) {
         const phpenv = join(path, '.phpenv')
         const composer = join(path, 'composer.json')
 
+        if (await exists(phpenv)) {
+            const version = (await readFile(phpenv, 'utf8')).toString().trim()
+
+            if (version && version.length) {
+                return explain ? { reason: phpenv, version } : version
+            }
+        }
+
         if (await exists(composer)) {
             const composerJson = (await readFile(composer, 'utf8'))
 
@@ -32,14 +40,6 @@ export default async function parseVersion(path, explain = false) {
                 }
             } catch (e) {
                 console.warn(`Invalid composer.json file detected at ${composer}, skipping`)
-            }
-        }
-
-        if (await exists(phpenv)) {
-            const version = (await readFile(phpenv, 'utf8')).toString().trim()
-
-            if (version && version.length) {
-                return explain ? { reason: phpenv, version } : version
             }
         }
 
