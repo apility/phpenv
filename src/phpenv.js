@@ -49,7 +49,11 @@ async function printVersion(path) {
     try {
         const env = await parseVersion(path, true)
         const php = await resolve('php', env.version)
-        console.log(`${php.version} (${env.reason})`)
+        if (php) {
+            console.log(`${php.version} (${env.reason})`)
+        } else {
+            console.log(`(none) (no installed php version for ${env.version})`)
+        }
     } catch (error) {
         console.error(colors.white(colors.bgRed(error)))
         process.exit(1)
