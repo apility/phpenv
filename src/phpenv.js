@@ -7,12 +7,13 @@ import { join, dirname } from 'path'
 import { readFile, writeFile, unlink } from 'fs/promises'
 import { fileURLToPath } from 'url';
 import { resolve, getVersions } from './lib/Homebrew.js'
+import parseVersion from './version-parser.js'
 
 async function writeEnvFile(path, arg = '*') {
     const envFile = join(path, '.phpenv')
 
     if (arg === undefined) {
-        return console.log(await version(path))
+        return console.log(await parseVersion(path))
     }
 
     if (await exists(envFile)) {
@@ -46,7 +47,7 @@ async function printUsage() {
 
 async function printVersion(path) {
     try {
-        const env = await version(path, true)
+        const env = await parseVersion(path, true)
         const php = await resolve('php', env.version)
         console.log(`${php.version} (${env.reason})`)
     } catch (error) {
@@ -87,39 +88,3 @@ export default async function phpenv(argv) {
             return process.exit(1)
     }
 }
-
-async function systemVersion(explain = false) {
-    const latest = (await getVersions('php')).shift()
-
-    if (latest) {
-        return explain ? { reason: 'system', version: latest.version } : latest.version
-    }
-
-    return explain ? { reason: 'system', version: '*' } : '*'
-}
-
-export async function version(path, explain = false) {
-    const cwd = path.split('/')
-
-    while (cwd.length) {
-        const path = cwd.join('/')
-        const phpenv = join(path, '.phpenv')
-
-        if (await exists(phpenv)) {
-            const version = (await readFile(phpenv, 'utf8')).toString().trim()
-
-            if (version && version.length) {
-                return explain ? { reason: phpenv, version } : version
-            }
-        }
-
-        cwd.pop()
-    }
-
-    if (process.env.PHP_VERSION && process.env.PHP_VERSION.trim()) {
-        return explain ? { reason: 'ENV: PHP_VERSION', version: process.env.PHP_VERSION.trim() } : process.env.PHP_VERSION.trim()
-    }
-
-    return systemVersion(explain)
-}
-
