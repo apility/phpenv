@@ -35,8 +35,6 @@ export default class Homebrew {
         if (resolved) {
             return resolved
         }
-
-        throw new Error(`${formula}@${version} not installed`)
     }
 }
 
