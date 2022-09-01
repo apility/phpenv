@@ -2,6 +2,7 @@ import { exec } from './Shell.js'
 import { readdir, realpath } from 'fs/promises'
 import { join, basename } from 'path'
 import semver from 'semver'
+import { oraPromise } from 'ora'
 
 export default class Homebrew {
     static get repository() {
@@ -43,9 +44,10 @@ export default class Homebrew {
             version = version.substring(1)
         }
 
-        const argv = ['install']
-        argv.push(version ? `${formula}@${version}` : formula)
-        return await exec(`brew`, argv)
+        const formulaString = version ? `${formula}@${version}` : formula
+        const argv = ['install', formulaString]
+
+        return await oraPromise(exec(`brew`, argv, { stdio: 'ignore' }), `Installing ${formulaString}`)
     }
 }
 

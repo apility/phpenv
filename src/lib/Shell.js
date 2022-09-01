@@ -1,10 +1,10 @@
 import { spawn, execSync } from 'child_process'
 
 export class Shell {
-    static async exec(path, argv) {
+    static async exec(path, argv, options = { stdio: 'inherit' }) {
         return await new Promise(async (resolve, reject) => {
             try {
-                const child = spawn(path, argv, { stdio: 'inherit' })
+                const child = spawn(path, argv, options)
                 child.on('exit', function (code) {
                     resolve(code)
                 })
