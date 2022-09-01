@@ -15,8 +15,13 @@ export default async function php(argv) {
     }
 
     try {
+        const version = await parseVersion(process.cwd())
         const php = await resolve('php', await parseVersion(process.cwd()))
-        process.exit(await exec(join(php.path, '/bin/php'), argv))
+        if (php) {
+            process.exit(await exec(join(php.path, '/bin/php'), argv))
+        } else {
+            throw new Error(`No installed PHP version found for ${version}`)
+        }
     } catch (error) {
         console.error(colors.white(colors.bgRed(error)))
         process.exit(1)
