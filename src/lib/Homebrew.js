@@ -1,3 +1,4 @@
+import { exec } from './Shell.js'
 import { readdir, realpath } from 'fs/promises'
 import { join, basename } from 'path'
 import semver from 'semver'
@@ -23,7 +24,7 @@ export default class Homebrew {
         return [...new Set(paths)]
             .map(path => ({
                 formula,
-                version: basename(path),
+                version: basename(path).replace(/[_]/, '+'),
                 path,
             })).sort((a, b) => semver.compare(b.version, a.version))
     }
@@ -36,7 +37,18 @@ export default class Homebrew {
             return resolved
         }
     }
+
+    static async install(formula, version = null) {
+        if (version && version[0] === '^') {
+            version = version.substring(1)
+        }
+
+        const argv = ['install']
+        argv.push(version ? `${formula}@${version}` : formula)
+        return await exec(`brew`, argv)
+    }
 }
 
 export const resolve = Homebrew.resolve
 export const getVersions = Homebrew.getVersions
+export const install = Homebrew.install
