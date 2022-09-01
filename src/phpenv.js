@@ -57,23 +57,29 @@ async function printVersion(path) {
 }
 
 export default async function phpenv(argv) {
+    const cwd = process.cwd()
+
     switch (argv[0]) {
         case '--version':
             await printPackageVersion()
             return process.exit(0)
         case 'version':
-            await printVersion(process.cwd())
+            await printVersion(cwd)
             return process.exit(0)
         case 'versions':
+            const current = await resolve('php', await parseVersion(cwd));
+
             (await getVersions('php'))
                 .map(formula => formula.version)
-                .forEach(version => console.log(`  ${version}`))
+                .forEach(version => {
+                    console.log(` ${version === current?.version ? '* ' : '  '}${version}`)
+                })
             return process.exit(0)
         case 'local':
             if (argv[1]) {
-                await writeEnvFile(process.cwd(), argv[1])
+                await writeEnvFile(cwd, argv[1])
             } else {
-                await printVersion(process.cwd())
+                await printVersion(cwd)
             }
             return process.exit(0)
         case 'global':
