@@ -54,7 +54,7 @@ async function printVersion(path) {
         if (php) {
             console.log(`${php.version} (${env.reason})`)
         } else {
-            console.log(`(system) (no installed php version for ${env.version})`)
+            console.log(`(none) (no installed php version for ${env.version})`)
         }
     } catch (error) {
         console.error(colors.white(colors.bgRed(error)))
