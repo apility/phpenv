@@ -4,7 +4,7 @@
         "name": "Thomas Alrek",
         "email": "thomas@apility.no"
     },
-    "version": "1.0.7",
+    "version": "1.0.8",
     "type": "module",
     "license": "MIT",
     "bin": {
