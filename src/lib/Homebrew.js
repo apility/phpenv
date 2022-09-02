@@ -1,4 +1,5 @@
 import { exec } from './Shell.js'
+import { execSync } from 'child_process'
 import { readdir, realpath } from 'fs/promises'
 import { join, basename } from 'path'
 import semver from 'semver'
@@ -39,18 +40,30 @@ export default class Homebrew {
         }
     }
 
+    static async listInstallableVersions(formula) {
+        const versions = execSync(`brew search '/\\\/?${formula}@.+/' | sed 's/ +/\\n/g' | sed -n '1d;p'`)
+            .toString()
+            .split(/\r?\n/)
+            .filter(formula => formula)
+            .map(formula => basename(formula).replace(/[_]/, '+'))
+            .sort((a, b) => b.localeCompare(a))
+
+        return [...new Set(versions)]
+    }
+
     static async install(formula, version = null) {
         if (version && version[0] === '^') {
             version = version.substring(1)
         }
 
         const formulaString = version ? `${formula}@${version}` : formula
-        const argv = ['install', formulaString]
+        const argv = ['install', formulaString, '--quiet']
 
-        return await oraPromise(exec(`brew`, argv, { stdio: 'ignore' }), `Installing ${formulaString}`)
+        return await oraPromise(exec(`brew`, argv), `Installing ${formulaString}`)
     }
 }
 
 export const resolve = Homebrew.resolve
 export const getVersions = Homebrew.getVersions
+export const listInstallableVersions = Homebrew.listInstallableVersions
 export const install = Homebrew.install

@@ -6,7 +6,7 @@ import colors from 'cli-color'
 import { join, dirname } from 'path'
 import { readFile, writeFile, unlink } from 'fs/promises'
 import { fileURLToPath } from 'url';
-import { resolve, getVersions, install } from './lib/Homebrew.js'
+import { resolve, getVersions, install, listInstallableVersions } from './lib/Homebrew.js'
 import parseVersion from './version-parser.js'
 
 async function writeEnvFile(path, arg = '*') {
@@ -38,6 +38,7 @@ async function printUsage() {
     console.log(`Usage: phpenv <command> [<args>]`)
     console.log('')
     console.log(`   install    Install a PHP version`)
+    console.log(`   list       List installable PHP versions`)
     console.log(`   local      Set or show the local application-specific PHP version`)
     console.log(`   global     Set or show the global PHP version`)
     console.log(`   version    Show the current PHP version and its origin`)
@@ -71,6 +72,15 @@ export default async function phpenv(argv) {
     switch (argv[0]) {
         case '--version':
             await printPackageVersion()
+            return process.exit(0)
+        case 'list':
+            console.log('Available versions:')
+
+            const installable = await listInstallableVersions('php')
+
+            installable.map(formula => formula.split('@')[1])
+                .forEach(version => console.log(`   ${version}`))
+
             return process.exit(0)
         case 'install':
             await installPHPVersion(argv[1])

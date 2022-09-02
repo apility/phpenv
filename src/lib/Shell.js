@@ -5,6 +5,7 @@ export class Shell {
         return await new Promise(async (resolve, reject) => {
             try {
                 const child = spawn(path, argv, options)
+
                 child.on('exit', function (code) {
                     resolve(code)
                 })
